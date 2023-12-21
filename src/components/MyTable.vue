@@ -1,10 +1,23 @@
 <template>
   <div>
-    <el-table v-bind="$attrs" border :data="tableData" style="width: 100%" v-loading="isLoading"
-      :element-loading-text="elementLoadingText" :element-loading-spinner="elementLoadingIcon">
+    <el-table
+      v-bind="$attrs"
+      border
+      :data="tableData"
+      style="width: 100%"
+      v-loading="isLoading"
+      :default-sort="{ prop: 'id', order: 'descending' }"
+      :element-loading-text="elementLoadingText"
+      :element-loading-spinner="elementLoadingIcon"
+    >
       <template v-for="(item, index) in tableOptions" :key="index">
         <!-- 正常展示数据的区域 -->
-        <el-table-column :label="item.label" :prop="item.prop" :align="item.align" :width="item.width">
+        <el-table-column
+          :label="item.label"
+          :prop="item.prop"
+          :align="item.align"
+          :width="item.width"
+        >
           <template #default="scope">
             <slot v-if="item.slot" :name="item.slot" :scope="scope"></slot>
             <span v-else>{{ scope.row[item.prop] }}</span>
@@ -13,8 +26,12 @@
       </template>
 
       <!-- 编辑区域 -->
-      <el-table-column :label="actionOptions.label" :prop="actionOptions.prop" :align="actionOptions.align"
-        :width="actionOptions.width">
+      <el-table-column
+        :label="actionOptions.label"
+        :prop="actionOptions.prop"
+        :align="actionOptions.align"
+        :width="actionOptions.width"
+      >
         <template #default="scope">
           <!-- action插槽 -->
           <slot name="action" :scope="scope"></slot>
@@ -22,10 +39,20 @@
       </el-table-column>
     </el-table>
   </div>
-  <div class="pagination" v-if="pagination" :style="{ justifyContent: paginationPosition }">
-    <el-pagination :current-page="currentPage" :page-size="pageSize" :page-sizes="pageSizes"
-      layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" />
+  <div
+    class="pagination"
+    v-if="pagination"
+    :style="{ justifyContent: paginationPosition }"
+  >
+    <el-pagination
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :page-sizes="pageSizes"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
   </div>
 </template>
 
