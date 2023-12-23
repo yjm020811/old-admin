@@ -11,7 +11,9 @@
     "@element-plus/icons-vue": "^2.1.0",
     "axios": "^1.6.2",
     "core-js": "^3.8.3",
+    "dayjs": "^1.11.10",
     "element-plus": "^2.4.2",
+    "lodash": "^4.17.21",
     "path": "^0.12.7",
     "pinia": "^2.1.7",
     "vue": "^3.2.13",
@@ -48,7 +50,8 @@
     },
     "rules": {
       "space-before-function-paren": "off",
-      "vue/multi-word-component-names": "off"
+      "vue/multi-word-component-names": "off",
+      "no-unused-vars": "off"
     }
   },
   "browserslist": [

@@ -6,7 +6,6 @@
       :data="tableData"
       style="width: 100%"
       v-loading="isLoading"
-      :default-sort="{ prop: 'id', order: 'descending' }"
       :element-loading-text="elementLoadingText"
       :element-loading-spinner="elementLoadingIcon"
     >
@@ -15,8 +14,8 @@
         <el-table-column
           :label="item.label"
           :prop="item.prop"
-          :align="item.align"
           :width="item.width"
+          align="center"
         >
           <template #default="scope">
             <slot v-if="item.slot" :name="item.slot" :scope="scope"></slot>

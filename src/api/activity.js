@@ -35,3 +35,12 @@ export const addActivityAxios = (data) => {
     data
   })
 }
+
+// 根据活动名模糊查询
+export const getActivityByName = (data) => {
+  return request({
+    url: '/my/activity/searchActivity',
+    method: 'POST',
+    data
+  })
+}

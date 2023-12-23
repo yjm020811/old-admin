@@ -1,12 +1,13 @@
+<!-- eslint-disable prefer-const -->
 <template>
   <div class="container">
-    <el-button :type="btnType" :size="btnSize" @click="openDialog">
+    <el-button :type="btnType" :size="btnSize" @click="openDialog" :icon="Edit">
       {{ btnName }}
     </el-button>
 
     <el-dialog
       v-bind="$attrs"
-      v-model="dialogVisible"
+      v-model:model-value="dialogVisible"
       :title="dialogTitle"
       width="30%"
       :before-close="handleClose"
@@ -26,10 +27,16 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits, defineExpose } from 'vue'
 import { ElMessageBox } from 'element-plus'
+import { Edit } from '@element-plus/icons-vue'
 
-const dialogVisible = ref(false)
+// eslint-disable-next-line prefer-const
+let dialogVisible = ref(false)
+
+defineExpose({
+  dialogVisible
+})
 
 defineProps({
   // 打开dialog的按钮名称
@@ -53,6 +60,8 @@ defineProps({
     required: true
   }
 })
+
+// console.log(props, 'dialog的props')
 
 // 自定义事件
 const emits = defineEmits([
@@ -91,7 +100,7 @@ const cancel = () => {
 
 // 确定按钮的事件
 const confirm = () => {
-  dialogVisible.value = false
+  // dialogVisible.value = false
   emits('updateConfirm')
 }
 </script>
