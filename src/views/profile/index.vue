@@ -7,20 +7,20 @@
     </template>
     <div class="content">
       <div class="left">
-        <img :src="userStore.userProfile.data.avatar" alt="" />
+        <img :src="userStore.userProfile?.data?.avatar" alt="" />
       </div>
       <div class="right">
         <div class="top">
           {{ greeting }}，{{
-            userStore.userProfile?.data.username
+            userStore.userProfile?.data?.username
           }}，生活变的再糟糕，也不妨碍我变得更好！
         </div>
         <div class="bottom">
           <div>
-            <span> 昵称：</span>{{ userStore.userProfile?.data.username }}
+            <span> 昵称：</span>{{ userStore.userProfile?.data?.username }}
           </div>
           <div>
-            <span> 电话号码：</span>{{ userStore.userProfile.data.phone }}
+            <span> 电话号码：</span>{{ userStore.userProfile?.data?.phone }}
           </div>
           <div><span>日期：</span>{{ formateTime(currentTime) }}</div>
         </div>
@@ -103,17 +103,21 @@ const oldPassword = ref('')
 const newPassword = ref('')
 
 const changePwd = async () => {
-  const res = await changePassword({
-    oldPassword: oldPassword.value,
-    newPassword: newPassword.value
-  })
-  console.log(res)
-  if (res.code === 200) {
-    ElMessage.success('修改成功')
-    router.push('/login')
-    removeItem('token')
-  } else {
-    ElMessage.error('修改成功')
+  try {
+    const res = await changePassword({
+      oldPassword: oldPassword.value,
+      newPassword: newPassword.value
+    })
+    console.log(res)
+    if (res.code === 200) {
+      ElMessage.success('修改成功')
+      router.push('/login')
+      removeItem('token')
+    } else {
+      ElMessage.error('修改失败')
+    }
+  } catch (error) {
+    ElMessage.error('修改失败')
   }
 }
 </script>
