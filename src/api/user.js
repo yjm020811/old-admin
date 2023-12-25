@@ -34,3 +34,14 @@ export const getActivityList = (params) => {
     params
   })
 }
+
+// 修改个人信息
+
+// 修改密码
+export const changePassword = (data) => {
+  return request({
+    url: '/my/resetPwd',
+    method: 'POST',
+    data
+  })
+}

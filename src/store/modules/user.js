@@ -7,7 +7,7 @@ import variables from '../../styles/variables.module.scss'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    userProfile: {},
+    userProfile: null,
     count: 0
   }),
   getters: {
@@ -31,11 +31,15 @@ export const useUserStore = defineStore('user', {
         })
     },
     // 获取用户信息
-    getUserInfo() {
-      getUserInfo().then((res) => {
-        console.log(res)
-        this.userProfile = res
-      })
+    // getUserInfo() {
+    //   getUserInfo().then((res) => {
+    //     console.log(res)
+    //     this.userProfile = res
+    //   })
+    // },
+    async getUserInfo() {
+      const res = await getUserInfo()
+      this.userProfile = res
     },
     // 退出登录
     logOut() {
