@@ -7,7 +7,11 @@
     </template>
     <div class="content">
       <div class="left">
-        <img :src="userStore.userProfile?.data?.avatar" alt="" />
+        <img
+          :src="userStore.userProfile?.data?.avatar"
+          alt=""
+          style="width: 180px; height: 200px"
+        />
       </div>
       <div class="right">
         <div class="top">
@@ -23,6 +27,10 @@
             <span> 电话号码：</span>{{ userStore.userProfile?.data?.phone }}
           </div>
           <div><span>日期：</span>{{ formateTime(currentTime) }}</div>
+          <div>
+            <span>天气：</span>{{ weatherLow }} - {{ weatherHigh }}
+            <p style="display: inline; margin-left: 12px">{{ tip }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -67,6 +75,7 @@ import dayjs from 'dayjs'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { removeItem } from '../../utils/storage'
+import axios from 'axios'
 const router = useRouter()
 const userStore = useUserStore()
 console.log(userStore)
@@ -96,6 +105,7 @@ const greeting = computed(() => {
 onMounted(() => {
   updateTime()
   setInterval(updateTime, 1000)
+  getWeather()
 })
 
 // 密码修改
@@ -119,6 +129,21 @@ const changePwd = async () => {
   } catch (error) {
     ElMessage.error('修改失败')
   }
+}
+
+// 获取天气状况
+const weatherLow = ref(null)
+const weatherHigh = ref(null)
+const tip = ref(null)
+const getWeather = async () => {
+  axios
+    .get('https://api.vvhan.com/api/weather', { params: { city: '成都' } })
+    .then((res) => {
+      console.log(res.data.info, '成都')
+      weatherLow.value = res.data.info.low
+      weatherHigh.value = res.data.info.high
+      tip.value = res.data.info.tip
+    })
 }
 </script>
 <style scoped>

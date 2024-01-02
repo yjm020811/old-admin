@@ -73,6 +73,10 @@
       <img :src="scope.row.img" alt="" style="width: 50px; height: 80px" />
     </template>
 
+    <template #newsContent="{ scope }">
+      {{ scope.row.newsContent.substring(0, 20) + '...' }}
+    </template>
+
     <!-- 自定义编辑区域 -->
     <template #action="{ scope }">
       <div class="action">
@@ -113,7 +117,7 @@
         <el-form-item label="新闻内容" prop="newsContent" label-width="80">
           <el-input v-model="editContent.newsContent" />
         </el-form-item>
-        <el-form-item label="图片" prop="img" label-width="80">
+        <el-form-item label="新闻图片" prop="img" label-width="80">
           <el-input v-model="editContent.img" />
         </el-form-item>
         <el-form-item label="发布时间" prop="releaseTime" label-width="80">
@@ -221,10 +225,11 @@ const options = [
   },
   {
     label: '新闻内容',
-    prop: 'newsContent'
+    prop: 'newsContent',
+    slot: 'newsContent'
   },
   {
-    label: '图片',
+    label: '新闻图片',
     prop: 'img',
     slot: 'img'
   },
@@ -450,13 +455,6 @@ const resetForm = (addForm) => {
   Object.keys(addForm).forEach((key) => {
     delete addForm[key]
   })
-}
-
-// 预览图片
-const imgIndex = ref()
-const preview = (e) => {
-  console.log(e)
-  imgIndex.value = e.$index
 }
 
 // svg

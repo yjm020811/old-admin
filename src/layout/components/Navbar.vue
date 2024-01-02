@@ -15,7 +15,11 @@
       <!-- 头像 -->
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <el-avatar shape="square" :size="40" :src="userStore.userProfile?.data?.avatar"></el-avatar>
+          <el-avatar
+            shape="square"
+            :size="40"
+            :src="userStore.userProfile?.data?.avatar"
+          ></el-avatar>
           <el-icon class="icon">
             <Setting />
           </el-icon>
@@ -52,8 +56,7 @@ const changeSidebarOpen = () => {
 </script>
 <style lang="scss" scoped>
 .navbar {
-  height: 60px;
-  overflow: hidden;
+  height: 48px;
   position: relative;
   background-color: #fff;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);

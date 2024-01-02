@@ -10,10 +10,11 @@ export const login = (data) => {
 }
 
 // 获取管理员信息
-export const getUserInfo = () => {
+export const getUserInfo = (params) => {
   return request({
     url: '/my/userinfo',
-    method: 'GET'
+    method: 'GET',
+    params
   })
 }
 

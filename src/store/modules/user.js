@@ -6,9 +6,11 @@ import router from '../../router/index'
 import variables from '../../styles/variables.module.scss'
 
 export const useUserStore = defineStore('user', {
+  persist: true,
   state: () => ({
     userProfile: null,
-    count: 0
+    count: 0,
+    id: null
   }),
   getters: {
     cssVar: (state) => variables
@@ -23,6 +25,7 @@ export const useUserStore = defineStore('user', {
         .then((res) => {
           console.log(res)
           this.userProfile = res
+          this.id = res.userId
           setItem('token', res.token)
           router.push('/')
         })
@@ -31,14 +34,11 @@ export const useUserStore = defineStore('user', {
         })
     },
     // 获取用户信息
-    // getUserInfo() {
-    //   getUserInfo().then((res) => {
-    //     console.log(res)
-    //     this.userProfile = res
-    //   })
-    // },
-    async getUserInfo() {
-      const res = await getUserInfo()
+    async getUserInfo(id) {
+      console.log('@@@@', id)
+      const res = await getUserInfo({
+        id
+      })
       this.userProfile = res
     },
     // 退出登录

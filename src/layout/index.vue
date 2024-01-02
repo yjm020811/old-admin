@@ -18,10 +18,9 @@ import Sidebar from './components/Sidebar'
 
 // 获取用户信息
 import { useUserStore } from '@/store/modules/user'
-// import { useCommonStore } from '@/store/modules/common'
 const userStore = useUserStore()
-userStore.getUserInfo()
-// const commonStore = useCommonStore()
+const id = userStore.id
+userStore.getUserInfo(id)
 </script>
 <style lang="scss" scoped>
 @import '../styles/variables.module.scss';
@@ -41,7 +40,6 @@ userStore.getUserInfo()
 
 .el-container {
   height: 100%;
-
 }
 
 .fixed-header {
