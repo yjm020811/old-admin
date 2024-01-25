@@ -44,3 +44,12 @@ export const getCleanerByName = (data) => {
     data
   })
 }
+
+// 上传工作人员头像
+export const uploadAvatar = (data) => {
+  return request({
+    url: '/my/house/uploadCleaners',
+    method: 'POST',
+    data
+  })
+}

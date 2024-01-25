@@ -52,6 +52,20 @@
             >
               <el-input v-model="addForm.affiliatedHospital" />
             </el-form-item>
+            <el-form-item label="工作照" label-width="80" prop="avatar">
+              <el-image :src="doctors" v-if="success"> </el-image>
+              <el-upload
+                v-if="!success"
+                class="avatar-uploader"
+                style="position: relative; right: 40px"
+                action="http://localhost:3000/my/doctor/addPhoto"
+                :show-file-list="false"
+                name="img"
+                :on-success="handleSuccess1"
+              >
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+              </el-upload>
+            </el-form-item>
           </el-form>
         </div>
         <template #footer>
@@ -129,6 +143,23 @@
           label-width="80"
         >
           <el-input v-model="editContent.affiliatedHospital" />
+        </el-form-item>
+        <el-form-item label="医生照片" prop="avatar" label-width="80">
+          <el-image
+            :src="editContent.avatar"
+            style="width: 70px; height: 80px"
+          ></el-image>
+          <el-upload
+            class="avatar-uploader"
+            action="http://localhost:3000/my/doctor/upload"
+            :show-file-list="false"
+            :data="{ id: editId }"
+            name="img"
+            :before-upload="beforeAvatarUpload"
+            :on-success="handleSuccess"
+          >
+            <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
         </el-form-item>
       </el-form>
     </div>
@@ -238,6 +269,11 @@ const options = [
     prop: 'affiliatedHospital'
   },
   {
+    label: '医生照片',
+    prop: 'avatar',
+    slot: 'avatar'
+  },
+  {
     label: '操作',
     align: 'center',
     action: true,
@@ -250,7 +286,8 @@ const editContent = reactive({
   username: '',
   price: '',
   treatmentTime: '',
-  affiliatedHospital: ''
+  affiliatedHospital: '',
+  avatar: ''
 })
 
 // 复制一份
@@ -267,6 +304,7 @@ const edit = (scope) => {
   editContent.price = scope.row.price
   editContent.treatmentTime = scope.row.treatmentTime
   editContent.affiliatedHospital = scope.row.affiliatedHospital
+  editContent.avatar = scope.row.avatar
   dialogVisible2.value = true
 }
 
@@ -305,7 +343,8 @@ const editFormRules = reactive({
   affiliatedHospital: [
     { required: true, message: '请输入所属医院', trigger: 'blur' },
     { min: 2, max: 10, message: '长度在2-10字', trigger: 'blur' }
-  ]
+  ],
+  avatar: [{ required: true, message: '请输入医生头像', trigger: 'blur' }]
 })
 const editFormRef = ref(null)
 const dialogVisible2 = ref(false)
@@ -358,7 +397,8 @@ const addForm = reactive({
   username: '',
   price: '',
   treatmentTime: '',
-  affiliatedHospital: ''
+  affiliatedHospital: '',
+  avatar: ''
 })
 const addFormRules = reactive({
   username: [
@@ -383,21 +423,24 @@ const dialogVisible1 = ref(false)
 
 // 新增医生
 const addAc = async () => {
+  console.log(addForm.avatar)
   addFormRef.value.validate(async (valid) => {
     if (valid) {
       console.log('验证通过')
-      console.log(addForm)
+      console.log(addForm.avatar)
       try {
         const res = await addDoctor({
           username: addForm.username,
           price: addForm.price,
           treatmentTime: addForm.treatmentTime,
-          affiliatedHospital: addForm.affiliatedHospital
+          affiliatedHospital: addForm.affiliatedHospital,
+          avatar: addForm.avatar
         })
         console.log(res)
         if (res.code === 200) {
           ElMessage.success('添加成功')
           resetForm(addForm)
+          success.value = false
           dialogVisible1.value = false
           getActivity()
         } else {
@@ -449,7 +492,7 @@ const findAct = _.debounce(async (e) => {
     })
     console.log(res)
     if (res.code === 200) {
-      ElMessage.success('搜索成功')
+      // ElMessage.success('搜索成功')
       tableData.value = res.data
     } else if (res.code === 201) {
       ElMessage({
@@ -475,11 +518,34 @@ const resetForm = (addForm) => {
   })
 }
 
-// 预览图片
-const imgIndex = ref()
-const preview = (e) => {
-  console.log(e)
-  imgIndex.value = e.$index
+const file1 = ref()
+const beforeAvatarUpload = (file) => {
+  console.log(file)
+}
+// 上传成功的回调
+const handleSuccess = async (response, file) => {
+  file1.value = file.name
+  editContent.avatar = response.data.avatarUrl
+  console.log(response)
+  ElMessage.success('切换工作照成功')
+  dialogVisible2.value = false
+  const res = await getAllDoctors()
+  if (res && res.data) {
+    tableData.value = res.data
+  }
+}
+
+const doctors = ref()
+const success = ref(false)
+const handleSuccess1 = async (response, file) => {
+  // 上传成功
+  console.log(response, file)
+  doctors.value = response.data.avatarUrl
+  addForm.avatar = response.data.avatarUrl
+  console.log(addForm.avatar)
+  if (response.code === 200) {
+    success.value = true
+  }
 }
 
 // svg
@@ -519,5 +585,31 @@ svg {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 28px;
+}
+.avatar-uploader {
+  margin-left: 40px;
+}
+</style>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 78px;
+  height: 78px;
+  text-align: center;
 }
 </style>

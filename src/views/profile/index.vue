@@ -3,6 +3,7 @@
     <template #header>
       <div class="card-header">
         <span>个人信息</span>
+        <img src="http://localhost:3000/images/img-1705569449205.jpg" alt="" />
       </div>
     </template>
     <div class="content">

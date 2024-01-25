@@ -39,7 +39,18 @@
               <el-input v-model="addForm.newsContent" />
             </el-form-item>
             <el-form-item label="图片" label-width="80" prop="img">
-              <el-input v-model="addForm.img" />
+              <el-image :src="news" v-if="success"> </el-image>
+              <el-upload
+                v-if="!success"
+                class="avatar-uploader"
+                action="http://localhost:3000/my/news/uploadNewsPic"
+                :show-file-list="false"
+                :data="{ id: editId }"
+                name="img"
+                :on-success="handleSuccess1"
+              >
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+              </el-upload>
             </el-form-item>
           </el-form>
         </div>
@@ -80,7 +91,7 @@
     <!-- 自定义编辑区域 -->
     <template #action="{ scope }">
       <div class="action">
-        <div class="edit">
+        <!-- <div class="edit">
           <el-button
             type="primary"
             size="small"
@@ -89,13 +100,11 @@
           >
             编辑
           </el-button>
-        </div>
+        </div> -->
         <div class="delete">
           <el-popconfirm title="确定删除吗?" @confirm="deleteAction(scope)">
             <template #reference>
-              <el-button size="small" type="danger" :icon="Delete"
-                >删除</el-button
-              >
+              <el-button type="danger" :icon="Delete">删除</el-button>
             </template>
           </el-popconfirm>
         </div>
@@ -103,7 +112,7 @@
     </template>
   </MyTable>
 
-  <el-dialog
+  <!-- <el-dialog
     v-model="dialogVisible2"
     title="编辑新闻"
     width="30%"
@@ -118,7 +127,22 @@
           <el-input v-model="editContent.newsContent" />
         </el-form-item>
         <el-form-item label="新闻图片" prop="img" label-width="80">
-          <el-input v-model="editContent.img" />
+          <el-image
+            :src="editContent.img"
+            style="width: 70px; height: 80px"
+          ></el-image>
+          <el-upload
+            class="avatar-uploader"
+            style="margin-left: 20px"
+            action="http://localhost:3000/my/house/upload"
+            :show-file-list="false"
+            :data="{ id: editId }"
+            name="img"
+            :before-upload="beforeAvatarUpload"
+            :on-success="handleSuccess"
+          >
+            <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
         </el-form-item>
         <el-form-item label="发布时间" prop="releaseTime" label-width="80">
           <el-date-picker
@@ -136,7 +160,7 @@
         <el-button type="primary" @click="updateConfirm">确定</el-button>
       </span>
     </template>
-  </el-dialog>
+  </el-dialog> -->
 </template>
 
 <script setup>
@@ -182,8 +206,6 @@ const getActivity = async () => {
   //  查询所有的值
   const res1 = await getAllNews()
   console.log(res1)
-  // srcList.value = res1.data.map((item) => item.avatar)
-
   if (res1 && res1.data) {
     total.value = res1.total
   }
@@ -268,7 +290,7 @@ const edit = (scope) => {
   editContent.newsContent = scope.row.newsContent
   editContent.img = scope.row.img
   editContent.releaseTime = scope.row.releaseTime
-  dialogVisible2.value = true
+  // dialogVisible2.value = true
 }
 
 // 删除表格数据
@@ -290,62 +312,62 @@ const deleteAction = async (scope) => {
 
 // 修改form数据
 // 编辑表格的rules
-const editFormRules = reactive({
-  newsName: [
-    { required: true, message: '请输入新闻名', trigger: 'blur' },
-    { min: 2, max: 100, message: '长度在2-100字', trigger: 'blur' }
-  ],
-  newsContent: [{ required: true, message: '请选择新闻内容', trigger: 'blur' }],
-  img: [{ required: true, message: '请输入图片', trigger: 'blur' }],
-  releaseTime: [
-    { required: true, message: '请输入新闻发布时间', trigger: 'blur' }
-  ]
-})
-const editFormRef = ref(null)
-const dialogVisible2 = ref(false)
-const updateConfirm = async () => {
-  editFormRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        const res = await changeNews({
-          newsName: editContent.newsName,
-          newsContent: editContent.newsContent,
-          img: editContent.img,
-          releaseTime: editContent.releaseTime,
-          id: editId.value
-        })
-        delete copyData.value.id
-        console.log(copyData.value)
-        console.log('编辑数据', editContent)
+// const editFormRules = reactive({
+//   newsName: [
+//     { required: true, message: '请输入新闻名', trigger: 'blur' },
+//     { min: 2, max: 100, message: '长度在2-100字', trigger: 'blur' }
+//   ],
+//   newsContent: [{ required: true, message: '请选择新闻内容', trigger: 'blur' }],
+//   img: [{ required: true, message: '请输入图片', trigger: 'blur' }],
+//   releaseTime: [
+//     { required: true, message: '请输入新闻发布时间', trigger: 'blur' }
+//   ]
+// })
+// const editFormRef = ref(null)
+// const dialogVisible2 = ref(false)
+// const updateConfirm = async () => {
+//   editFormRef.value.validate(async (valid) => {
+//     if (valid) {
+//       try {
+//         const res = await changeNews({
+//           newsName: editContent.newsName,
+//           newsContent: editContent.newsContent,
+//           img: editContent.img,
+//           releaseTime: editContent.releaseTime,
+//           id: editId.value
+//         })
+//         delete copyData.value.id
+//         console.log(copyData.value)
+//         console.log('编辑数据', editContent)
 
-        const isEqual = ref(deepEqual(copyData.value, editContent))
-        console.log(isEqual)
-        if (res.code === 200 && isEqual.value === false) {
-          console.log(res)
-          ElMessage.success('修改成功')
-          dialogVisible2.value = false
-          isEqual.value = null
-          getActivity()
-        } else if (isEqual.value === true) {
-          ElMessage.warning('没有修改')
-          isEqual.value = null
-        } else {
-          ElMessage.error('修改失败')
-        }
-      } catch (error) {
-        ElMessage.error('修改失败')
-        console.log(error)
-      }
-    } else {
-      ElMessage({
-        message: '修改失败',
-        grouping: true,
-        type: 'error'
-      })
-      return false
-    }
-  })
-}
+//         const isEqual = ref(deepEqual(copyData.value, editContent))
+//         console.log(isEqual)
+//         if (res.code === 200 && isEqual.value === false) {
+//           console.log(res)
+//           ElMessage.success('修改成功')
+//           dialogVisible2.value = false
+//           isEqual.value = null
+//           getActivity()
+//         } else if (isEqual.value === true) {
+//           ElMessage.warning('没有修改')
+//           isEqual.value = null
+//         } else {
+//           ElMessage.error('修改失败')
+//         }
+//       } catch (error) {
+//         ElMessage.error('修改失败')
+//         console.log(error)
+//       }
+//     } else {
+//       ElMessage({
+//         message: '修改失败',
+//         grouping: true,
+//         type: 'error'
+//       })
+//       return false
+//     }
+//   })
+// }
 
 // 新增活动
 const addForm = reactive({
@@ -358,8 +380,7 @@ const addFormRules = reactive({
     { required: true, message: '请输入新闻名', trigger: 'blur' },
     { min: 2, max: 100, message: '长度在2-100字', trigger: 'blur' }
   ],
-  newsContent: [{ required: true, message: '请选择新闻内容', trigger: 'blur' }],
-  img: [{ required: true, message: '请输入图片', trigger: 'blur' }]
+  newsContent: [{ required: true, message: '请选择新闻内容', trigger: 'blur' }]
 })
 const addFormRef = ref(null)
 const dialogVisible1 = ref(false)
@@ -413,7 +434,7 @@ const handleClose1 = () => {
 const handleClose2 = () => {
   ElMessageBox.confirm('确定关闭吗?')
     .then(() => {
-      dialogVisible2.value = false
+      // dialogVisible2.value = false
       resetForm(addForm)
     })
     .catch((error) => {
@@ -457,6 +478,19 @@ const resetForm = (addForm) => {
   })
 }
 
+const news = ref()
+const success = ref(false)
+const handleSuccess1 = async (response, file) => {
+  // 上传成功
+  console.log(response, file)
+  news.value = response.data.avatarUrl
+  addForm.img = response.data.avatarUrl
+  success.value = true
+  if (response.code === 200) {
+    success.value = true
+  }
+}
+
 // svg
 const svg = `
         <path class="path" d="
@@ -494,5 +528,28 @@ svg {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 28px;
+}
+</style>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 78px;
+  height: 78px;
+  text-align: center;
 }
 </style>

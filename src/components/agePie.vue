@@ -1,4 +1,4 @@
-<!-- 年龄的饼图 -->
+<!-- 性别的饼图 -->
 <template>
   <!-- echarts 的容器 -->
   <div ref="divRef" :style="{ width: width, height: height }"></div>
@@ -7,6 +7,7 @@
 <script setup>
 import { onMounted, watch, ref, defineProps } from 'vue'
 import useEchart from '../hooks/useEchart'
+import { getOldUserList } from '../api/oldUser'
 const props = defineProps({
   width: {
     type: String,
@@ -28,6 +29,37 @@ const props = defineProps({
 const divRef = ref(null)
 let hyChart = null
 
+// 获取用户列表
+const userList = ref([])
+const getAct = async () => {
+  const res = await getOldUserList()
+  console.log(res.data, '###')
+  userList.value = res.data
+  const res1 = formatData(userList.value)
+  console.log(res1)
+  window.localStorage.setItem('res1', JSON.stringify(res1))
+}
+
+const formatData = (a) => {
+  console.log(a, '123')
+  // 初始化男女计数
+  const maleCount = ref(0)
+  const femaleCount = ref(0)
+  a.forEach((person) => {
+    if (person.gender === '男') {
+      maleCount.value++
+    } else if (person.gender === '女') {
+      femaleCount.value++
+    }
+  })
+  // 构造返回结果数组
+  const resultArray = [
+    { value: maleCount.value, name: '男' },
+    { value: femaleCount.value, name: '女' }
+  ]
+  return resultArray
+}
+
 // 监听 echartDatas 的变化
 watch(
   () => props.echartDatas,
@@ -37,6 +69,7 @@ watch(
 )
 
 onMounted(() => {
+  getAct()
   setupEchart(props.echartDatas) // 第一次走这里
 })
 
@@ -50,16 +83,17 @@ function setupEchart(echartDatas = []) {
 
 function getOption(echartDatas) {
   const option = {
+    title: {
+      text: '用户性别'
+    },
     tooltip: {
       trigger: 'item'
     },
     legend: {
-      top: '5%',
       left: 'center'
     },
     series: [
       {
-        name: 'Access From',
         type: 'pie',
         radius: ['40%', '70%'],
         avoidLabelOverlap: false,
@@ -82,13 +116,7 @@ function getOption(echartDatas) {
         labelLine: {
           show: false
         },
-        data: [
-          { value: 1048, name: 'Search Engine' },
-          { value: 735, name: 'Direct' },
-          { value: 580, name: 'Email' },
-          { value: 484, name: 'Union Ads' },
-          { value: 300, name: 'Video Ads' }
-        ]
+        data: JSON.parse(window.localStorage.getItem('res1'))
       }
     ]
   }

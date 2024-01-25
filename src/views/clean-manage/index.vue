@@ -41,9 +41,21 @@
             <el-form-item label="工作时间" label-width="80" prop="workTime">
               <el-input v-model="addForm.workTime" />
             </el-form-item>
-            <!-- <el-form-item label="工作照" label-width="80" prop="avatar">
-              <el-input v-model="addForm.avatar" />
-            </el-form-item> -->
+            <el-form-item label="工作照" label-width="80" prop="avatar">
+              <el-image :src="cleaners" v-if="success"> </el-image>
+              <el-upload
+                v-if="!success"
+                class="avatar-uploader"
+                style="position: relative; right: 40px"
+                action="http://localhost:3000/my/house/uploadCleaners"
+                :show-file-list="false"
+                :data="{ id: editId }"
+                name="img"
+                :on-success="handleSuccess1"
+              >
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+              </el-upload>
+            </el-form-item>
           </el-form>
         </div>
         <template #footer>
@@ -118,15 +130,26 @@
         <el-form-item label="工作照" prop="avatar" label-width="80">
           <el-image
             :src="editContent.avatar"
-            style="width: 50px; height: 80px"
+            style="width: 70px; height: 80px"
           />
+          <el-upload
+            class="avatar-uploader"
+            action="http://localhost:3000/my/house/upload"
+            :show-file-list="false"
+            :data="{ id: editId }"
+            name="img"
+            :before-upload="beforeAvatarUpload"
+            :on-success="handleSuccess"
+          >
+            <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
         </el-form-item>
       </el-form>
     </div>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible2 = false">取消</el-button>
-        <el-button type="primary" @click="updateConfirm"> 确定 </el-button>
+        <el-button type="primary" @click="updateConfirm">确定</el-button>
       </span>
     </template>
   </el-dialog>
@@ -140,10 +163,11 @@ import {
   deleteCleaners,
   changeCleaners,
   addCleaners,
-  getCleanerByName
+  getCleanerByName,
+  uploadAvatar
 } from '../../api/clean'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Delete, Edit } from '@element-plus/icons-vue'
+import { Search, Delete, Edit, Plus } from '@element-plus/icons-vue'
 import _ from 'lodash'
 import { deepEqual } from '../../utils/objectEqualls'
 
@@ -241,8 +265,7 @@ const options = [
 const editContent = reactive({
   username: '',
   price: '',
-  workTime: '',
-  avatar: ''
+  workTime: ''
 })
 
 // 复制一份
@@ -325,6 +348,7 @@ const updateConfirm = async () => {
         } else {
           ElMessage.error('修改失败')
         }
+        dialogVisible2.value = false
       } catch (error) {
         ElMessage.error('修改失败')
         console.log(error)
@@ -360,8 +384,7 @@ const addFormRules = reactive({
     { min: 2, max: 10, message: '长度在2-10字', trigger: 'blur' }
   ]
   // avatar: [
-  //   { required: true, message: '请选择工作照', trigger: 'blur' },
-  //   { min: 2, max: 10, message: '长度在2-10字', trigger: 'blur' }
+  //   { required: true, message: '请上传文件', trigger: 'change' } // 规则可根据实际情况调整
   // ]
 })
 const addFormRef = ref(null)
@@ -376,7 +399,8 @@ const addAc = async () => {
         const res = await addCleaners({
           username: addForm.username,
           price: addForm.price,
-          workTime: addForm.workTime
+          workTime: addForm.workTime,
+          avatar: cleaners.value
         })
         console.log(res)
         if (res.code === 200) {
@@ -459,13 +483,37 @@ const resetForm = (addForm) => {
   })
 }
 
-// 预览图片
-const imgIndex = ref()
-const preview = (e) => {
-  console.log(e)
-  imgIndex.value = e.$index
+// 上传图片
+const file1 = ref()
+const beforeAvatarUpload = (file) => {
+  console.log(file)
 }
 
+// 上传成功的回调
+const handleSuccess = async (response, file) => {
+  file1.value = file.name
+  console.log(response)
+  editContent.avatar = response.data.avatarUrl
+  console.log(response)
+  ElMessage.success('切换工作照成功')
+  dialogVisible2.value = false
+  const res = await getAllCleaners()
+  if (res && res.data) {
+    tableData.value = res.data
+  }
+}
+
+// 新增家政
+const cleaners = ref()
+const success = ref(false)
+const handleSuccess1 = async (response, file) => {
+  // 上传成功
+  console.log(response, file)
+  cleaners.value = response.data.avatarUrl
+  if (response.code === 200) {
+    success.value = true
+  }
+}
 // svg
 const svg = `
         <path class="path" d="
@@ -503,5 +551,32 @@ svg {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 28px;
+}
+
+.avatar-uploader {
+  margin-left: 40px;
+}
+</style>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 78px;
+  height: 78px;
+  text-align: center;
 }
 </style>

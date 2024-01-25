@@ -6,6 +6,7 @@
 <script setup>
 import { onMounted, watch, ref, defineProps } from 'vue'
 import useEchart from '../hooks/useEchart'
+import { getOldUserList } from '../api/oldUser'
 const props = defineProps({
   width: {
     type: String,
@@ -23,6 +24,35 @@ const props = defineProps({
   }
 })
 
+// 获取用户列表
+const userList = ref([])
+const healthStatus = ref([])
+const getAct = async () => {
+  const res = await getOldUserList()
+  console.log(res.data, '###')
+  userList.value = res.data
+  userList.value.forEach((item) => {
+    console.log(item)
+    healthStatus.value.push(item.healthStatus)
+    console.log(healthStatus.value)
+    const res = Array.from(healthStatus.value)
+    console.log(res)
+    const result = res.reduce((acc, currentValue) => {
+      const existingItem = acc.find((item) => item.name === currentValue)
+
+      if (existingItem) {
+        existingItem.value += 1
+      } else {
+        acc.push({ value: 1, name: currentValue })
+      }
+
+      return acc
+    }, [])
+    console.log(result)
+    window.localStorage.setItem('healthStatus', JSON.stringify(result))
+  })
+}
+
 // 拿到dom对象
 const divRef = ref(null)
 let hyChart = null
@@ -36,6 +66,7 @@ watch(
 )
 
 onMounted(() => {
+  getAct()
   setupEchart(props.echartDatas) // 第一次走这里
 })
 
@@ -49,149 +80,24 @@ function setupEchart(echartDatas = []) {
 
 function getOption(echartDatas) {
   const option = {
-    grid: {
-      left: '5%',
-      right: '1%',
-      top: '20%',
-      bottom: '15%',
-      containLabel: true // grid 区域是否包含坐标轴的刻度标签
-    },
-    legend: {
-      right: 'center',
-      bottom: '5%',
-      itemGap: 20,
-      itemWidth: 13,
-      itemHeigth: 12,
-      textStyle: {
-        color: '#64BCFF'
-      },
-      icon: 'rect'
+    title: {
+      text: '健康状态',
+      top: '5%',
+      left: 'center'
     },
     tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'line',
-        lineStyle: {
-          color: '#20FF89'
-        }
-      }
+      trigger: 'item'
     },
-    xAxis: [
-      {
-        type: 'category',
-        axisLine: {
-          show: false
-        },
-        axisLabel: {
-          color: '#64BCFF'
-        },
-        splitLine: {
-          show: false
-        },
-        axisTick: {
-          show: false
-        },
-        data: [
-          '1月',
-          '2月',
-          '3月',
-          '4月',
-          '5月',
-          '6月',
-          '7月',
-          '8月',
-          '9月',
-          '10月',
-          '11月',
-          '12月'
-        ]
-      }
-    ],
-    yAxis: [
-      {
-        type: 'value',
-        splitLine: {
-          show: false
-        },
-        axisLine: {
-          show: false
-        },
-        axisLabel: {
-          show: true,
-          color: '#64BCFF'
-        }
-      }
-    ],
+    legend: {
+      left: 'center'
+    },
+    color: ['#67c23a', '#e6a23c', '#f56c6c', '#f56c6c'],
     series: [
       {
-        name: '正常',
-        type: 'line',
-        smooth: true,
-        stack: '总量',
-        symbolSize: 5,
-        showSymbol: false,
-        itemStyle: {
-          color: '#20FF89',
-          lineStyle: {
-            color: '#20FF89',
-            width: 2
-          }
-        },
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              {
-                offset: 0,
-                color: '#20FF89'
-              },
-              {
-                offset: 1,
-                color: 'rgba(255, 255, 255, 0)'
-              }
-            ]
-          }
-        },
-        data: [220, 182, 191, 234, 290, 330, 310, 201, 154, 190, 330, 410]
-      },
-      {
-        name: '异常',
-        type: 'line',
-        smooth: true,
-        stack: '总量',
-        symbolSize: 5,
-        showSymbol: false,
-        itemStyle: {
-          color: '#EA9502',
-          lineStyle: {
-            color: '#EA9502',
-            width: 2
-          }
-        },
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              {
-                offset: 0,
-                color: '#EA9502'
-              },
-              {
-                offset: 1,
-                color: 'rgba(255, 255, 255, 0)'
-              }
-            ]
-          }
-        },
-        data: [20, 12, 11, 24, 90, 330, 10, 1, 154, 90, 330, 10]
+        name: '健康状态',
+        type: 'pie',
+        radius: '50%',
+        data: JSON.parse(window.localStorage.getItem('healthStatus'))
       }
     ]
   }
